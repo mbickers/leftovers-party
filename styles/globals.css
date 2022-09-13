@@ -24,3 +24,8 @@ a {
     background: black;
   }
 }
+
+input[type=file] {
+  opacity: 1; /* Hide the default button/preview, but remain accessible. See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#examples */
+  background-color: lightblue;
+}
