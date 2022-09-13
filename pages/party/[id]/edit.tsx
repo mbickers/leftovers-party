@@ -26,9 +26,10 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   }
 }
 
-const LeftoverCell = ({ initialLeftover }: { initialLeftover: Leftover }) => {
+const LeftoverCell = ({ initialLeftover, deleteLeftover }: { initialLeftover: Leftover, deleteLeftover: (s: string) => void }) => {
   const onDelete = event => {
     event.preventDefault();
+    deleteLeftover(initialLeftover.id)
   }
   return (
     <div>
@@ -45,7 +46,7 @@ const LeftoverCell = ({ initialLeftover }: { initialLeftover: Leftover }) => {
 const Edit = ({ initialParty }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
   const [party, setParty] = useState<Party>(initialParty)
-  const [newLeftoverImages, setNewLeftoverImages] = useState<{ [key: string]: File }>({})
+  const [selectedLeftoverImages, setSelectedLeftoverImages] = useState<{ [key: string]: File }>({})
   const formRef = useRef<HTMLFormElement>()
 
   const handleImageInput = event => {
@@ -57,10 +58,10 @@ const Edit = ({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
     event.target.value = ""
 
 
-    const newImages: { [key: string]: File } = {}
+    const newSelectedLeftoverImages: { [key: string]: File } = {}
     const newLeftovers = files.map(file => {
       const id = crypto.randomUUID()
-      newImages[id] = file
+      newSelectedLeftoverImages[id] = file
       return {
         id,
         description: "",
@@ -68,7 +69,7 @@ const Edit = ({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
         image_url: URL.createObjectURL(file)
       }})
 
-    setNewLeftoverImages({...newLeftoverImages, ...newImages})
+    setSelectedLeftoverImages({...selectedLeftoverImages, ...newSelectedLeftoverImages})
     setParty({...party, leftovers: party.leftovers.concat(newLeftovers) })
   }
 
@@ -76,11 +77,20 @@ const Edit = ({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
     event.preventDefault()
 
     const formData = new FormData(formRef.current)
-    for (const [id, file] of Object.entries(newLeftoverImages)) {
+    for (const [id, file] of Object.entries(selectedLeftoverImages)) {
       formData.append(id, file)
     }
 
     await fetch("/api/hello", {method: "POST", body: formData});
+  }
+
+  const deleteLeftover = id => {
+    const newLeftovers = party.leftovers.filter(leftover => leftover.id !== id)
+    setParty({ ...party, leftovers: newLeftovers })
+    
+    const newSelectedLeftoverImages = { ...selectedLeftoverImages }
+    delete newSelectedLeftoverImages[id]
+    setSelectedLeftoverImages(newSelectedLeftoverImages)
   }
 
   return (
@@ -93,7 +103,7 @@ const Edit = ({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
       <form onSubmit={handleSubmit} ref={formRef}>
         <label htmlFor="name">Name</label>
         <input type={"text"} id="name" name="name" defaultValue={initialParty.name}></input>
-        {party.leftovers.map(leftover => <LeftoverCell initialLeftover={leftover} key={leftover.id} />
+        {party.leftovers.map(leftover => <LeftoverCell initialLeftover={leftover} deleteLeftover={deleteLeftover} key={leftover.id} />
           )}
         <input type="submit"></input>
       </form>
