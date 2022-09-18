@@ -1,15 +1,25 @@
 import { Leftover } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ApiResponse } from '../../../../lib/api';
+import { ApiResponse, errorBody } from '../../../../lib/api';
 import prisma from '../../../../lib/prisma';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse<Leftover>>,
 ) {
-  const { id } = req.query;
-  const { owner } = req.body;
+  if (req.method !== 'POST') {
+    res.status(405).json(errorBody('this endpoint only supports post requests'));
+    return;
+  }
 
+  const { id } = req.query;
+  const { data } = JSON.parse(req.body);
+  if (!data) {
+    res.status(400).json({ errors: [{ message: 'request must have data' }] });
+    return;
+  }
+
+  const { owner } = data;
   if (typeof owner !== 'string') {
     res.status(400).json({ errors: [{ message: 'must specify owner (can be empty string)' }] });
     return;
