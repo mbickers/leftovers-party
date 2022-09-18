@@ -34,3 +34,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prisma
+*.sqlite3
+
+# dev environment
+/tmp
+
+# node stuff
+yarn.lock
+package-lock.json

@@ -1,55 +1,53 @@
+import { Leftover, Party } from '@prisma/client'
 import type { GetServerSideProps, GetServerSidePropsResult, InferGetServerSidePropsType, NextPage, NextPageContext } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
-import { useRouter } from 'next/router'
-import { useRef, useState } from 'react'
+import { SyntheticEvent, useRef, useState } from 'react'
+import prisma from '../../../lib/prisma'
 
-type Leftover = {id: string, description: string, owner: string, image_url: string }
-type Party = {id: string, name: string, leftovers: Leftover[]}
+export const getServerSideProps: GetServerSideProps<{ initialParty: Party & { leftovers: Leftover[] } }> = async (context) => {
+  const { query } = context
+  const id = query.id as string
 
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+  const party = await prisma.party.findUnique({ where: { id }, include: { leftovers: true }})
 
-  const leftovers: Leftover[] = [
-          { id: "0", description: "meatballs", owner: "Max", image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6tT-hR7jmedBjiqkWmPDp4EjipkOB4eGTMQ&usqp=CAU" },
-          { id: "1", description: "rice and chickpeas", owner: "Arya", image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_HtOUC489RstiQhbdR5MV30azCdbTCvqEUA&usqp=CAU"}]
-
-  const id = params?.id as string
+  if (!party) {
+    return {
+      notFound: true
+    }
+  }
 
   return {
     props: {
-      initialParty: {
-        id,
-        name: "HoganLeftovers",
-        leftovers
-      }
+      initialParty: party
     }
   }
 }
 
-const LeftoverCell = ({ initialLeftover, deleteLeftover }: { initialLeftover: Leftover, deleteLeftover: (s: string) => void }) => {
-  const onDelete = event => {
+type LeftoverCellProps = { leftover: Leftover, setLeftover: (leftover: Leftover) => void, deleteLeftover: (id: string) => void }
+
+const LeftoverCell: React.FC<LeftoverCellProps> = ({ leftover, setLeftover, deleteLeftover }) => {
+  const onDelete = (event: SyntheticEvent) => {
     event.preventDefault();
-    deleteLeftover(initialLeftover.id)
+    deleteLeftover(leftover.id)
   }
+
   return (
     <div>
-      <img src={initialLeftover.image_url} alt="leftover image" width="50px" height="50px" />
-      <label htmlFor={`description-${initialLeftover.id}`} >Description</label>
-      <input type="text" id={`description-${initialLeftover.id}`} name={`description-${initialLeftover.id}`} defaultValue={initialLeftover.description}></input>
-      <label htmlFor={`owner-${initialLeftover.id}`} >Owner</label>
-      <input type="text" id={`owner-${initialLeftover.id}`} name={`owner-${initialLeftover.id}`} defaultValue={initialLeftover.owner}></input>
+      <img src={leftover.image_url} alt="leftover image" width="50px" height="50px" />
+      <label htmlFor={`description-${leftover.id}`} >Description</label>
+      <input type="text" id={`description-${leftover.id}`} value={leftover.description} onChange={e => setLeftover({...leftover, description: e.target.value})}></input>
+      <label htmlFor={`owner-${leftover.id}`} >Owner</label>
+      <input type="text" id={`owner-${leftover.id}`} value={leftover.owner} onChange={e => setLeftover({...leftover, owner: e.target.value})}></input>
       <button onClick={onDelete}>Delete</button>
     </div>
   )
 }
 
 const Edit = ({ initialParty }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-
-  const [party, setParty] = useState<Party>(initialParty)
+  const [party, setParty] = useState(initialParty)
   const [selectedLeftoverImages, setSelectedLeftoverImages] = useState<{ [key: string]: File }>({})
-  const formRef = useRef<HTMLFormElement>()
 
-  const handleImageInput = event => {
+  const handleImageInput = (event: SyntheticEvent) => {
     if (event.target.files.length === 0) {
       return
     }
@@ -66,25 +64,27 @@ const Edit = ({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
         id,
         description: "",
         owner: "",
-        image_url: URL.createObjectURL(file)
+        image_url: URL.createObjectURL(file),
+        partyId: party.id
       }})
 
     setSelectedLeftoverImages({...selectedLeftoverImages, ...newSelectedLeftoverImages})
     setParty({...party, leftovers: party.leftovers.concat(newLeftovers) })
   }
 
-  const handleSubmit = async event => {
+  const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault()
 
-    const formData = new FormData(formRef.current)
+    const formData = new FormData()
+    formData.append("party", JSON.stringify(party))
     for (const [id, file] of Object.entries(selectedLeftoverImages)) {
       formData.append(id, file)
     }
 
-    await fetch("/api/hello", {method: "POST", body: formData});
+    await fetch(`/api/parties/${party.id}`, {method: "POST", body: formData});
   }
 
-  const deleteLeftover = id => {
+  const deleteLeftover = (id: string) => {
     const newLeftovers = party.leftovers.filter(leftover => leftover.id !== id)
     setParty({ ...party, leftovers: newLeftovers })
     
@@ -100,10 +100,10 @@ const Edit = ({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <form onSubmit={handleSubmit} ref={formRef}>
+      <form onSubmit={handleSubmit} >
         <label htmlFor="name">Name</label>
-        <input type={"text"} id="name" name="name" defaultValue={initialParty.name}></input>
-        {party.leftovers.map(leftover => <LeftoverCell initialLeftover={leftover} deleteLeftover={deleteLeftover} key={leftover.id} />
+        <input type={"text"} id="name" name="name" value={party.name} onChange={e => setParty({ ...party, name: e.target.value })}></input>
+        {party.leftovers.map(leftover => <LeftoverCell leftover={leftover} setLeftover={newLeftover => setParty({ ...party, leftovers: party.leftovers.map(leftover => leftover.id === newLeftover.id ? newLeftover : leftover)})} deleteLeftover={deleteLeftover} key={leftover.id} />
           )}
         <input type="submit"></input>
       </form>
