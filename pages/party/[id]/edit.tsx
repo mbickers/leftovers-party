@@ -70,10 +70,10 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
     // eslint-disable-next-line no-param-reassign
     event.target.value = '';
 
-    const newSelectedLeftoverImages: { [key: string]: File } = {};
+    const newSelectedLeftoverImages = new Map(selectedLeftoverImages);
     const newLeftovers = files.map((file) => {
       const id = crypto.randomUUID();
-      newSelectedLeftoverImages[id] = file;
+      newSelectedLeftoverImages.set(id, file);
       return {
         id,
         description: '',
@@ -83,7 +83,7 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
       };
     });
 
-    setSelectedLeftoverImages({ ...selectedLeftoverImages, ...newSelectedLeftoverImages });
+    setSelectedLeftoverImages(newSelectedLeftoverImages);
     setParty({ ...party, leftovers: party.leftovers.concat(newLeftovers) });
   };
 
