@@ -8,6 +8,7 @@ export default async function handler(
 ) {
   if (req.method !== "GET") {
     res.status(405).send("only GET supported at this endpoint")
+    return
   }
 
   const { path } = req.query

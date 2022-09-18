@@ -1,7 +1,7 @@
+import { Leftover } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-import { db } from "../../../../lib/db";
-import { Leftover } from "../../../../lib/types";
 import { ApiResponse } from "../../../../lib/api";
+import prisma from "../../../../lib/prisma";
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<Leftover>>) {
@@ -18,12 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return
   }
 
-  const leftover = db.leftovers[id]
+  const leftover = await prisma.leftover.update({ where: { id }, data: { owner }})
   if (!leftover) {
     res.status(400).json({ errors: [{ message: `no leftover with id '${id}'` }]})
     return
   }
 
-  leftover.owner = owner
   res.status(200).json({ data: leftover })
 }

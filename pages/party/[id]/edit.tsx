@@ -1,7 +1,8 @@
 import { Leftover, Party } from '@prisma/client'
 import type { GetServerSideProps, GetServerSidePropsResult, InferGetServerSidePropsType, NextPage, NextPageContext } from 'next'
 import Head from 'next/head'
-import { SyntheticEvent, useRef, useState } from 'react'
+import Image from 'next/image'
+import { ChangeEvent, ChangeEventHandler, FormEventHandler, SyntheticEvent, useRef, useState } from 'react'
 import prisma from '../../../lib/prisma'
 
 export const getServerSideProps: GetServerSideProps<{ initialParty: Party & { leftovers: Leftover[] } }> = async (context) => {
@@ -33,11 +34,11 @@ const LeftoverCell: React.FC<LeftoverCellProps> = ({ leftover, setLeftover, dele
 
   return (
     <div>
-      <img src={leftover.image_url} alt="leftover image" width="50px" height="50px" />
+      <Image src={leftover.image_url} alt="" width="50px" height="50px" />
       <label htmlFor={`description-${leftover.id}`} >Description</label>
-      <input type="text" id={`description-${leftover.id}`} value={leftover.description} onChange={e => setLeftover({...leftover, description: e.target.value})}></input>
+      <input type="text" id={`description-${leftover.id}`} value={leftover.description} onChange={e => setLeftover({ ...leftover, description: e.target.value })}></input>
       <label htmlFor={`owner-${leftover.id}`} >Owner</label>
-      <input type="text" id={`owner-${leftover.id}`} value={leftover.owner} onChange={e => setLeftover({...leftover, owner: e.target.value})}></input>
+      <input type="text" id={`owner-${leftover.id}`} value={leftover.owner} onChange={e => setLeftover({ ...leftover, owner: e.target.value })}></input>
       <button onClick={onDelete}>Delete</button>
     </div>
   )
@@ -46,9 +47,8 @@ const LeftoverCell: React.FC<LeftoverCellProps> = ({ leftover, setLeftover, dele
 const Edit = ({ initialParty }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [party, setParty] = useState(initialParty)
   const [selectedLeftoverImages, setSelectedLeftoverImages] = useState<{ [key: string]: File }>({})
-
-  const handleImageInput = (event: SyntheticEvent) => {
-    if (event.target.files.length === 0) {
+  const handleImageInput = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || event.target.files.length === 0) {
       return
     }
 
