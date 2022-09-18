@@ -1,19 +1,18 @@
-import { randomUUID } from "crypto"
-import prisma from "../../lib/prisma"
+import prisma from '../../lib/prisma';
 
 export async function getServerSideProps() {
   const newPost = await prisma.party.create({
     data: {
-      name: "New Party",
-    }
-  })
+      name: 'New Party',
+    },
+  });
 
   return {
     redirect: {
-      destination: `/party/${newPost.id}/edit`
-    }
-  }
+      destination: `/party/${newPost.id}/edit`,
+    },
+  };
 }
 
-const New = () => {}
-export default New
+const New = () => {};
+export default New;
