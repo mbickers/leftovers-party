@@ -42,5 +42,4 @@ next-env.d.ts
 /tmp
 
 # node stuff
-yarn.lock
 package-lock.json
