@@ -44,18 +44,16 @@ function EditLeftoverCell({ leftover, setLeftover, deleteLeftover }: EditLeftove
   };
 
   return (
-    <div className="overflow-hidden bg-gray-100">
-      <div className="sm:flex">
-        <div className="sm:shrink-0 aspect-square sm:h-48 sm:w-48">
-          <picture>
-            <img src={leftover.image_url} alt="" className="object-cover" />
-          </picture>
-        </div>
-        <div className="flex-grow p-2 space-y-2">
-          <Input name="Description" value={leftover.description} setValue={(value) => setLeftover({ ...leftover, description: value })} />
-          <Input name="Owner" value={leftover.owner} setValue={(value) => setLeftover({ ...leftover, owner: value })} />
-          <button type="button" onClick={onDelete} className="bg-red-200 hover:bg-red-300 p-2 px-3">Delete</button>
-        </div>
+    <div className="overflow-hidden bg-gray-100 sm:flex sm:h-64">
+      <div className="sm:shrink-0 sm:w-64 bg-blue-400">
+        <picture>
+          <img src={leftover.image_url} alt="" className="object-cover aspect-square w-full" />
+        </picture>
+      </div>
+      <div className="flex-grow p-2 space-y-2">
+        <Input name="Description" value={leftover.description} setValue={(value) => setLeftover({ ...leftover, description: value })} />
+        <Input name="Owner" value={leftover.owner} setValue={(value) => setLeftover({ ...leftover, owner: value })} />
+        <button type="button" onClick={onDelete} className="bg-red-200 hover:bg-red-300 p-2 px-3">Delete</button>
       </div>
     </div>
   );
@@ -140,14 +138,14 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
           )}
 
           <div>
-            <label htmlFor="image_choose" className="bg-blue-200 hover:bg-blue-300 p-2 px-3">
+            <label htmlFor="image_choose" className="bg-blue-200 hover:bg-blue-300 p-2 px-3 hover:cursor-pointer">
               Choose photos to upload
               <input type="file" id="image_choose" accept="image/png, image/jpeg" multiple onChange={handleImageInput} className="w-0" />
             </label>
           </div>
 
           <div>
-            <label htmlFor="image_take" className="bg-blue-200 hover:bg-blue-300 p-2 px-3">
+            <label htmlFor="image_take" className="bg-blue-200 hover:bg-blue-300 p-2 px-3 hover:cursor-pointer">
               Take picture
               <input type="file" id="image_take" accept="image/png, image/jpeg" capture="environment" onChange={handleImageInput} className="w-0" />
             </label>
