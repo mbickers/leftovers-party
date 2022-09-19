@@ -7,6 +7,7 @@ import Link from 'next/link';
 import React, {
   ChangeEvent, SyntheticEvent, useState,
 } from 'react';
+import { Card } from '../../../components/card';
 import { Input } from '../../../components/input';
 import prisma from '../../../lib/prisma';
 
@@ -44,18 +45,13 @@ function EditLeftoverCell({ leftover, setLeftover, deleteLeftover }: EditLeftove
   };
 
   return (
-    <div className="overflow-hidden bg-gray-100 sm:flex sm:h-64">
-      <div className="sm:shrink-0 sm:w-64 bg-blue-400">
-        <picture>
-          <img src={leftover.image_url} alt="" className="object-cover aspect-square w-full" />
-        </picture>
-      </div>
-      <div className="flex-grow p-2 space-y-2">
+    <Card image_url={leftover.image_url}>
+      <div className="flex-grow space-y-2">
         <Input name="Description" value={leftover.description} setValue={(value) => setLeftover({ ...leftover, description: value })} />
         <Input name="Owner" value={leftover.owner} setValue={(value) => setLeftover({ ...leftover, owner: value })} />
         <button type="button" onClick={onDelete} className="bg-red-200 hover:bg-red-300 p-2 px-3">Delete</button>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -123,9 +119,10 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="space-y-4">
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <Input name="Party name" value={party.name} setValue={(value) => setParty({ ...party, name: value })} />
+
           {party.leftovers.map(
             (leftover) => (
               <EditLeftoverCell
@@ -137,19 +134,20 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
             ),
           )}
 
-          <div>
-            <label htmlFor="image_choose" className="bg-blue-200 hover:bg-blue-300 p-2 px-3 hover:cursor-pointer">
+          <label htmlFor="image_choose" className="block">
+            <div className="bg-blue-200 hover:bg-blue-300 p-2 px-3 hover:cursor-pointer w-fit">
               Choose photos to upload
-              <input type="file" id="image_choose" accept="image/png, image/jpeg" multiple onChange={handleImageInput} className="w-0" />
-            </label>
-          </div>
+            </div>
+            <input type="file" id="image_choose" accept="image/png, image/jpeg" multiple onChange={handleImageInput} className="hidden" />
+          </label>
 
-          <div>
-            <label htmlFor="image_take" className="bg-blue-200 hover:bg-blue-300 p-2 px-3 hover:cursor-pointer">
+          <label htmlFor="image_take" className="block">
+            <div className="bg-blue-200 hover:bg-blue-300 p-2 px-3 hover:cursor-pointer w-fit">
               Take picture
-              <input type="file" id="image_take" accept="image/png, image/jpeg" capture="environment" onChange={handleImageInput} className="w-0" />
-            </label>
-          </div>
+            </div>
+            <input type="file" id="image_take" accept="image/png, image/jpeg" capture="environment" onChange={handleImageInput} className="hidden" />
+          </label>
+
           <button type="submit" className="bg-green-300 hover:bg-green-400 p-2 px-3">Save</button>
         </form>
 
@@ -157,7 +155,7 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
           Claim leftovers
           {' '}
           <Link href={`/party/${party.id}/claim`}><a className="underline">here</a></Link>
-          .
+          . Save a link to the current page to make future edits.
         </div>
       </div>
     </>
