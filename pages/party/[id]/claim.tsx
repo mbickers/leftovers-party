@@ -1,5 +1,6 @@
 import { Leftover, Party } from '@prisma/client';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import Head from 'next/head';
 import React, { SyntheticEvent, useState } from 'react';
 import { Card } from '../../../components/card';
 import { Input } from '../../../components/input';
@@ -113,22 +114,28 @@ export default function Claim(
   }
 
   return (
-    <div className="space-y-3">
-      <h1 className="text-xl font-bold">{party.name}</h1>
-      <p>
-        {`Hi ${name} ${emojiForString(name)}. Claim your leftovers:`}
-      </p>
-      <button type="button" onClick={() => setName('')} className="bg-blue-200 hover:bg-blue-300 p-2 px-3">Change my name</button>
-      {party.leftovers.map(
-        (leftover) => (
-          <ClaimLeftoverCell
-            key={leftover.id}
-            leftover={leftover}
-            name={name}
-            setLeftoverOwner={(newOwner) => setLeftoverOwner(newOwner, leftover.id)}
-          />
-        ),
-      )}
-    </div>
+    <>
+      <Head>
+        <title>Claim your leftovers</title>
+      </Head>
+
+      <div className="space-y-3">
+        <h1 className="text-xl font-bold">{party.name}</h1>
+        <p>
+          {`Hi ${name} ${emojiForString(name)}. Claim your leftovers:`}
+        </p>
+        <button type="button" onClick={() => setName('')} className="bg-blue-200 hover:bg-blue-300 p-2 px-3">Change my name</button>
+        {party.leftovers.map(
+          (leftover) => (
+            <ClaimLeftoverCell
+              key={leftover.id}
+              leftover={leftover}
+              name={name}
+              setLeftoverOwner={(newOwner) => setLeftoverOwner(newOwner, leftover.id)}
+            />
+          ),
+        )}
+      </div>
+    </>
   );
 }

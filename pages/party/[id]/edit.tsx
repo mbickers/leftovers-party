@@ -120,7 +120,7 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
   return (
     <>
       <Head>
-        <title>Edit Your Party</title>
+        <title>Edit your party</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
