@@ -1,8 +1,16 @@
 import { Leftover, Party } from '@prisma/client';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import Image from 'next/image';
 import React, { SyntheticEvent, useState } from 'react';
+import { Card } from '../../../components/card';
+import { Input } from '../../../components/input';
 import prisma from '../../../lib/prisma';
+
+const emojiForString = (string: string) => {
+  const emojis = ['🤓', '😶‍🌫️', '😤', '🫥', '😎', '🤔', '😵‍💫', '🤠', '🤨', '😇', '🥸', '🧐', '😳'];
+  const idx = Array.from(string)
+    .map((c) => c.charCodeAt(0)).reduce((acc, el) => acc + el) % emojis.length;
+  return emojis[idx];
+};
 
 type ClaimPageProps = { initialParty: Party & { leftovers: Leftover[] }, initialName: string };
 
@@ -31,15 +39,30 @@ type ClaimLeftoverCellProps = {
 
 function ClaimLeftoverCell({ leftover, name, setLeftoverOwner }: ClaimLeftoverCellProps) {
   return (
-    <div>
-      <Image src={leftover.image_url} alt="" width="50px" height="50px" />
-      <p>{leftover.description}</p>
-      <p>
-        { leftover.owner ? `Claimed by ${leftover.owner}` : 'Unclaimed' }
-      </p>
-      { leftover.owner === name
-        ? <button type="button" onClick={() => setLeftoverOwner('')}>Unclaim</button> : <button type="button" onClick={() => setLeftoverOwner(name)}>This is mine and I want to keep it</button>}
-    </div>
+    <Card image_url={leftover.image_url}>
+      <div className="space-y-3">
+        <p>
+          {leftover.description + (leftover.description ? '. ' : '')}
+          { leftover.owner
+            ? (
+              <>
+                Claimed by
+                {' '}
+                <span className="font-bold">
+                  {leftover.owner === name ? 'You' : leftover.owner}
+                  {' '}
+                  {emojiForString(leftover.owner)}
+                </span>
+              </>
+            )
+            : 'Unclaimed' }
+          .
+        </p>
+        { leftover.owner === name
+          ? <button type="button" onClick={() => setLeftoverOwner('')} className="p-2 px-3 bg-red-200 hover:bg-red-300">Unclaim 🙅</button>
+          : <button type="button" onClick={() => setLeftoverOwner(name)} className="p-2 px-3 bg-green-200 hover:bg-green-300 text-left">This is mine and I want to keep it 🧑‍🍳</button>}
+      </div>
+    </Card>
   );
 }
 
@@ -54,12 +77,9 @@ function SetName({ setName }: SetNameProps) {
     }
   };
   return (
-    <form onSubmit={onSubmit}>
-      <label htmlFor="name">
-        Name
-        <input id="name" type="text" value={tempName} onChange={(e) => setTempName(e.target.value)} />
-      </label>
-      { tempName ? <input type="submit" /> : null}
+    <form onSubmit={onSubmit} className="space-y-3">
+      <Input name="Enter your name" value={tempName} setValue={setTempName} />
+      { tempName ? <button type="submit" className="p-2 px-3 bg-blue-200 hover:bg-blue-300">Claim some leftovers 😎</button> : null}
     </form>
   );
 }
@@ -93,8 +113,12 @@ export default function Claim(
   }
 
   return (
-    <>
-      <p>{party.name}</p>
+    <div className="space-y-3">
+      <h1 className="text-xl font-bold">{party.name}</h1>
+      <p>
+        {`Hi ${name} ${emojiForString(name)}. Claim your leftovers:`}
+      </p>
+      <button type="button" onClick={() => setName('')} className="bg-blue-200 hover:bg-blue-300 p-2 px-3">Change my name</button>
       {party.leftovers.map(
         (leftover) => (
           <ClaimLeftoverCell
@@ -105,7 +129,6 @@ export default function Claim(
           />
         ),
       )}
-      <button type="button" onClick={() => setName('')}>Change my name</button>
-    </>
+    </div>
   );
 }

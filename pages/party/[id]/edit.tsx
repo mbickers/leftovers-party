@@ -153,7 +153,7 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
             <input type="file" id="image_take" accept="image/png, image/jpeg" capture="environment" onChange={handleImageInput} className="hidden" />
           </label>
 
-          <button type="submit" className="bg-green-300 hover:bg-green-400 p-2 px-3">Save</button>
+          <button type="submit" className="bg-green-200 hover:bg-green-300 p-2 px-3">Save</button>
         </form>
 
         { showClaimLink
