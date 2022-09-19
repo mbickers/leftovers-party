@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>leftovers.party 🍗</title>
+        <title>leftovers.party</title>
       </Head>
       <div className="space-y-3">
         <h1 className="font-bold">Figure out what stuff in your fridge people still care about.</h1>
