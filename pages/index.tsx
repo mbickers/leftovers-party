@@ -20,7 +20,7 @@ export default function Home() {
         then you finally have your roommates&apos; blessing to throw it away.
       </p>
       <p>
-        Don't wait any longer.
+        Don&apos;t wait any longer.
       </p>
       <Link href="/party/new"><a className="bg-green-200 hover:bg-green-300 p-2 px-3 block w-fit">Start a party 🥳</a></Link>
     </div>

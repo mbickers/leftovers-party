@@ -19,6 +19,7 @@ export default async function handler(
 
   try {
     const file = await retrieve(path);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     res.status(200).send(file);
   } catch {
     res.status(404).send('image not found');
