@@ -58,6 +58,8 @@ function EditLeftoverCell({ leftover, setLeftover, deleteLeftover }: EditLeftove
 function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [party, setParty] = useState(initialParty);
   const [selectedLeftoverImages, setSelectedLeftoverImages] = useState(new Map<string, File>());
+  const [showClaimLink, setShowClaimLink] = useState(initialParty.leftovers.length > 0);
+
   const handleImageInput = (event: ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) {
       return;
@@ -91,7 +93,10 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
     formData.append('party', JSON.stringify(party));
     selectedLeftoverImages.forEach((file, id) => formData.append(id, file));
 
-    await fetch(`/api/parties/${party.id}`, { method: 'POST', body: formData });
+    const response = await fetch(`/api/parties/${party.id}`, { method: 'POST', body: formData });
+    const { data: updatedParty } = await response.json();
+    setParty(updatedParty);
+    setShowClaimLink(updatedParty.leftovers.length > 0);
   };
 
   const deleteLeftover = (id: string) => {
@@ -151,12 +156,15 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
           <button type="submit" className="bg-green-300 hover:bg-green-400 p-2 px-3">Save</button>
         </form>
 
-        <div>
-          Claim leftovers
-          {' '}
-          <Link href={`/party/${party.id}/claim`}><a className="underline">here</a></Link>
-          . Save a link to the current page to make future edits.
-        </div>
+        { showClaimLink
+          ? (
+            <div>
+              Claim leftovers
+              {' '}
+              <Link href={`/party/${party.id}/claim`}><a className="underline">here</a></Link>
+              . Save a link to the current page to make future edits.
+            </div>
+          ) : undefined }
       </div>
     </>
   );
