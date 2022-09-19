@@ -3,10 +3,11 @@ import type {
   GetServerSideProps, InferGetServerSidePropsType,
 } from 'next';
 import Head from 'next/head';
-import Image from 'next/image';
+import Link from 'next/link';
 import React, {
   ChangeEvent, SyntheticEvent, useState,
 } from 'react';
+import { Input } from '../../../components/input';
 import prisma from '../../../lib/prisma';
 
 type EditPageProps = { initialParty: Party & { leftovers: Leftover[] } };
@@ -43,17 +44,19 @@ function EditLeftoverCell({ leftover, setLeftover, deleteLeftover }: EditLeftove
   };
 
   return (
-    <div>
-      <Image src={leftover.image_url} alt="" width="50px" height="50px" />
-      <label htmlFor={`description-${leftover.id}`}>
-        Description
-        <input type="text" id={`description-${leftover.id}`} value={leftover.description} onChange={(e) => setLeftover({ ...leftover, description: e.target.value })} />
-      </label>
-      <label htmlFor={`owner-${leftover.id}`}>
-        Owner
-        <input type="text" id={`owner-${leftover.id}`} value={leftover.owner} onChange={(e) => setLeftover({ ...leftover, owner: e.target.value })} />
-      </label>
-      <button type="submit" onClick={onDelete}>Delete</button>
+    <div className="overflow-hidden bg-gray-100">
+      <div className="sm:flex">
+        <div className="sm:shrink-0 aspect-square sm:h-48 sm:w-48">
+          <picture>
+            <img src={leftover.image_url} alt="" className="object-cover" />
+          </picture>
+        </div>
+        <div className="flex-grow p-2 space-y-2">
+          <Input name="Description" value={leftover.description} setValue={(value) => setLeftover({ ...leftover, description: value })} />
+          <Input name="Owner" value={leftover.owner} setValue={(value) => setLeftover({ ...leftover, owner: value })} />
+          <button type="button" onClick={onDelete} className="bg-red-200 hover:bg-red-300 p-2 px-3">Delete</button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -122,36 +125,42 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="name">
-          Name
-          <input type="text" id="name" name="name" value={party.name} onChange={(e) => setParty({ ...party, name: e.target.value })} />
-        </label>
-        {party.leftovers.map(
-          (leftover) => (
-            <EditLeftoverCell
-              leftover={leftover}
-              setLeftover={setLeftover}
-              deleteLeftover={deleteLeftover}
-              key={leftover.id}
-            />
-          ),
-        )}
-        <input type="submit" />
-      </form>
+      <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input name="Party name" value={party.name} setValue={(value) => setParty({ ...party, name: value })} />
+          {party.leftovers.map(
+            (leftover) => (
+              <EditLeftoverCell
+                leftover={leftover}
+                setLeftover={setLeftover}
+                deleteLeftover={deleteLeftover}
+                key={leftover.id}
+              />
+            ),
+          )}
 
-      <div>
-        <label htmlFor="image_choose">
-          Choose images to upload
-          <input type="file" id="image_choose" accept="image/png, image/jpeg" multiple onChange={handleImageInput} />
-        </label>
-      </div>
+          <div>
+            <label htmlFor="image_choose" className="bg-blue-200 hover:bg-blue-300 p-2 px-3">
+              Choose photos to upload
+              <input type="file" id="image_choose" accept="image/png, image/jpeg" multiple onChange={handleImageInput} className="w-0" />
+            </label>
+          </div>
 
-      <div>
-        <label htmlFor="image_take">
-          Take picture
-          <input type="file" id="image_take" accept="image/png, image/jpeg" multiple capture="user" onChange={handleImageInput} />
-        </label>
+          <div>
+            <label htmlFor="image_take" className="bg-blue-200 hover:bg-blue-300 p-2 px-3">
+              Take picture
+              <input type="file" id="image_take" accept="image/png, image/jpeg" capture="environment" onChange={handleImageInput} className="w-0" />
+            </label>
+          </div>
+          <button type="submit" className="bg-green-300 hover:bg-green-400 p-2 px-3">Save</button>
+        </form>
+
+        <div>
+          Claim leftovers
+          {' '}
+          <Link href={`/party/${party.id}/claim`}><a className="underline">here</a></Link>
+          .
+        </div>
       </div>
     </>
   );
