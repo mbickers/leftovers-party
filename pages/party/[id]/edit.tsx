@@ -2,7 +2,6 @@ import { Leftover, Party } from '@prisma/client';
 import type {
   GetServerSideProps, InferGetServerSidePropsType,
 } from 'next';
-import { COOKIE_NAME_PRERENDER_BYPASS } from 'next/dist/server/api-utils';
 import Head from 'next/head';
 import Link from 'next/link';
 import React, {
