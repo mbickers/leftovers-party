@@ -16,7 +16,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <div className="max-w-2xl mx-auto p-4 space-y-4">
           <header className="font-bold text-xl p-2 border-black border-4 flex justify-between">
             <NextLink href="/">leftovers.party</NextLink>
-            <div>
+            <div className="hover:rotate-180 transition-all">
               🍗
             </div>
           </header>

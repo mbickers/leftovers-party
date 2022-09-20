@@ -2,6 +2,7 @@ import { Leftover, Party } from '@prisma/client';
 import type {
   GetServerSideProps, InferGetServerSidePropsType,
 } from 'next';
+import { COOKIE_NAME_PRERENDER_BYPASS } from 'next/dist/server/api-utils';
 import Head from 'next/head';
 import Link from 'next/link';
 import React, {
@@ -55,12 +56,49 @@ function EditLeftoverCell({ leftover, setLeftover, deleteLeftover }: EditLeftove
   );
 }
 
+const resizeImage = async (file: File) => {
+  const image = await new Promise<HTMLImageElement>((resolve) => {
+    const tempImage = new Image();
+    tempImage.addEventListener('load', () => {
+      resolve(tempImage);
+    });
+    tempImage.src = URL.createObjectURL(file);
+  });
+
+  const canvas = document.createElement('canvas');
+  const size = 256;
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+
+  if (image.height > image.width) {
+    const sourceY = Math.floor((image.height - image.width) / 2);
+    ctx.drawImage(image, 0, sourceY, image.width, image.width, 0, 0, size, size);
+  } else {
+    const sourceX = Math.floor((image.width - image.height) / 2);
+    ctx.drawImage(image, sourceX, 0, image.height, image.height, 0, 0, size, size);
+  }
+
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((newBlob) => {
+      if (!newBlob) {
+        reject(new Error('Unable to convert canvas to blob'));
+        return;
+      }
+      resolve(newBlob);
+    });
+  });
+
+  const outputFile = new File([blob], 'resized.png');
+  return outputFile;
+};
+
 function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [party, setParty] = useState(initialParty);
   const [selectedLeftoverImages, setSelectedLeftoverImages] = useState(new Map<string, File>());
   const [showClaimLink, setShowClaimLink] = useState(initialParty.leftovers.length > 0);
 
-  const handleImageInput = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleImageInput = async (event: ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) {
       return;
     }
@@ -70,17 +108,18 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
     event.target.value = '';
 
     const newSelectedLeftoverImages = new Map(selectedLeftoverImages);
-    const newLeftovers = files.map((file) => {
+    const newLeftovers = await Promise.all(files.map(async (file) => {
       const id = crypto.randomUUID();
-      newSelectedLeftoverImages.set(id, file);
+      const resizedFile = await resizeImage(file);
+      newSelectedLeftoverImages.set(id, resizedFile);
       return {
         id,
         description: '',
         owner: '',
-        image_url: URL.createObjectURL(file),
+        image_url: URL.createObjectURL(resizedFile),
         partyId: party.id,
       };
-    });
+    }));
 
     setSelectedLeftoverImages(newSelectedLeftoverImages);
     setParty({ ...party, leftovers: party.leftovers.concat(newLeftovers) });
