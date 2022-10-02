@@ -122,7 +122,7 @@ export default function Claim(
       <div className="space-y-3">
         <h1 className="text-xl font-bold">{party.name}</h1>
         <p>
-          {`Hi ${name} ${emojiForString(name)}. Claim your leftovers:`}
+          {`Hi ${name} ${emojiForString(name)}. Claim the leftovers you want to keep:`}
         </p>
         <button type="button" onClick={() => setName('')} className="bg-blue-200 hover:bg-blue-300 p-2 px-3">Change my name</button>
         {party.leftovers.map(
