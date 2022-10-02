@@ -108,7 +108,7 @@ function Edit({ initialParty }: InferGetServerSidePropsType<typeof getServerSide
 
     const newSelectedLeftoverImages = new Map(selectedLeftoverImages);
     const newLeftovers = await Promise.all(files.map(async (file) => {
-      const id = crypto.randomUUID();
+      const id = String(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER));
       const resizedFile = await resizeImage(file);
       newSelectedLeftoverImages.set(id, resizedFile);
       return {
